@@ -6,12 +6,18 @@ description: |
   The Naemon core is a network monitoring tool based on the Nagios 4 core, but with many bug fixes, new features, and performance enhancements. If you today use Nagios, you should switch to Naemon to get bugfixes, new features, and performance enhancements.
 grade: devel
 confinement: devmode
-
+architectures:
+  - build-on: amd64
 apps:
   daemon:
     command: 'bin/naemon.wrapper'
     plugs: [network-bind]
     daemon: simple
+  naemon: # located in parts/naemon-core/build/src/naemon/naemon
+    command: 'bin/naemon'  # not copied?
+    plugs: [network-bind]
+  naemonstats:
+    command: 'bin/naemonstats'
 parts:
   naemon-core:
     plugin: make
@@ -24,13 +30,36 @@ parts:
       - git
       - pkg-config
       - gcc
-    stage-packages:
-      - apache2
     source: https://github.com/naemon/naemon-core.git
     override-build: |
       mkdir -p /root/stage/etc/naemon
       mkdir -p /root/stage/bin
       ./autogen.sh
+      make
+      make install
+    # layout: will be needed when we switch confinement
+    organize:
+      /usr/local/bin/naemon: bin/
+      /usr/local/bin/naemonstats: bin/
+  naemon-livestatus:
+    source: https://github.com/naemon/naemon-livestatus.git
+    plugin: make
+    override-build: |
+      # libtoolize
+      autoreconf -is
+      automake --add-missing
+      #./configure CPPFLAGS=-I$(path to naemon include files, usually /usr/local/naemon/include)
+      ./configure CPPFLAGS=-I/usr/local/include/naemon
+      make
+      make install
+  thruk:
+    source: https://github.com/sni/Thruk.git
+    plugin: make
+    build-packages:
+      - libmodule-build-perl
+      - libmodule-install-perl
+    override-build: |
+      ./configure
       make
   initial-config:
     plugin: dump
