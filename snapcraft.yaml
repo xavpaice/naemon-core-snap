@@ -1,0 +1,45 @@
+name: naemon-core
+version: alpha1
+base: core20
+summary: foobar
+description: |
+  foobar
+grade: devel
+confinement: devmode
+
+apps:
+  daemon:
+    command: 'bin/naemon.wrapper'
+    plugs: [network-bind]
+    daemon: simple
+parts:
+  naemon-core:
+    plugin: make
+    build-packages:
+      - make
+      - dh-autoreconf
+      - libglib2.0-dev
+      - gperf
+      - help2man
+      - git
+      - pkg-config
+      - gcc
+    stage-packages:
+      - apache2
+    source: .
+    override-build: |
+      mkdir -p /root/stage/etc/naemon
+      mkdir -p /root/stage/bin
+      ./autogen.sh
+      make
+  initial-config:
+    plugin: dump
+    source: https://github.com/naemon/naemon-core.git
+    organize:
+      daemon_arguments: etc/naemon/daemon_arguments.example
+      snap_config_wrapper: bin/naemon.wrapper
+      naemon: bin/naemon
+    prime:
+      - etc/naemon/daemon_arguments.example
+      - bin/naemon.wrapper
+

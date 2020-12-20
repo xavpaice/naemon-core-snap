@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# If it's first run copy initial config to writeable location
+test -e $SNAP_DATA/daemon_arguments || cp $SNAP/etc/naemon/daemon_arguments.example $SNAP_DATA/daemon_arguments
+
+. $SNAP_DATA/daemon_arguments
+# https://forum.snapcraft.io/t/phase-1-of-opt-in-per-snap-users-groups-aka-the-daemon-user/10624
+# https://forum.snapcraft.io/t/system-usernames/13386
+#/bin/chown -R naemon:naemon /run/naemon/
+#/bin/su naemon --login --shell=/bin/sh "--command=${SNAP}/bin/naemon --verify-config $SNAP_DATA/naemon.cfg"
+#/bin/su naemon --login --shell=/bin/sh "--command=${SNAP}/bin/naemon --daemon $SNAP_DATA/naemon.cfg"
+${SNAP}/bin/naemon --verify-config $SNAP_DATA/naemon.cfg
+${SNAP}/bin/naemon --daemon $SNAP_DATA/naemon.cfg
