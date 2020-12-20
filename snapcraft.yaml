@@ -1,9 +1,9 @@
 name: naemon-core
 version: alpha1
 base: core20
-summary: foobar
+summary: network monitoring tool based on the Nagios 4 core
 description: |
-  foobar
+  The Naemon core is a network monitoring tool based on the Nagios 4 core, but with many bug fixes, new features, and performance enhancements. If you today use Nagios, you should switch to Naemon to get bugfixes, new features, and performance enhancements.
 grade: devel
 confinement: devmode
 
@@ -26,7 +26,7 @@ parts:
       - gcc
     stage-packages:
       - apache2
-    source: .
+    source: https://github.com/naemon/naemon-core.git
     override-build: |
       mkdir -p /root/stage/etc/naemon
       mkdir -p /root/stage/bin
@@ -34,7 +34,7 @@ parts:
       make
   initial-config:
     plugin: dump
-    source: https://github.com/naemon/naemon-core.git
+    source: .
     organize:
       daemon_arguments: etc/naemon/daemon_arguments.example
       snap_config_wrapper: bin/naemon.wrapper
